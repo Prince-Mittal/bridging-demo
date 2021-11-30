@@ -24,7 +24,7 @@ function App() {
     },
   ]);
   const callbackSuccess = (scanResult, imageArr) => {
-    let data;
+    let data = scanResult;
     if (Platform.OS === 'android') {
       data = JSON.parse(scanResult);
     }
@@ -48,8 +48,9 @@ function App() {
 
   const scanReceipt = async () => {
     //NativeModule will be called here
+    let granted;
     if (Platform.OS === 'android') {
-      const granted = await PermissionsAndroid.request(
+      granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.CAMERA,
         {
           title: 'Permission to Access Camera',
@@ -58,11 +59,14 @@ function App() {
           buttonPositive: 'Allow',
         },
       );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        NativeModules.ScanReceipt.scan(callbackSuccess, callbackError);
-      } else {
-        console.log('Camera permission denied');
-      }
+    }
+    if (
+      granted === PermissionsAndroid.RESULTS.GRANTED ||
+      Platform.OS === 'ios'
+    ) {
+      NativeModules.ScanReceipt.scan(callbackSuccess, callbackError);
+    } else {
+      console.log('Camera permission denied');
     }
   };
 

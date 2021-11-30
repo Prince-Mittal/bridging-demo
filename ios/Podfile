@@ -1,7 +1,11 @@
 require_relative '../node_modules/react-native/scripts/react_native_pods'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
-
+plugin 'cocoapods-user-defined-build-types'
+source 'https://github.com/BlinkReceipt/PodSpecRepo.git'
+source 'https://cdn.cocoapods.org/'
 platform :ios, '10.0'
+
+enable_user_defined_build_types!
 
 target 'RNBlinkreceipt' do
   config = use_native_modules!
@@ -11,6 +15,9 @@ target 'RNBlinkreceipt' do
     # to enable hermes on iOS, change `false` to `true` and then install pods
     :hermes_enabled => false
   )
+
+  # pod 'BlinkReceipt'
+  pod 'BlinkReceipt', '~> 1.8' , :build_type => :dynamic_framework
 
   target 'RNBlinkreceiptTests' do
     inherit! :complete
@@ -24,6 +31,10 @@ target 'RNBlinkreceipt' do
   use_flipper!()
 
   post_install do |installer|
-    react_native_post_install(installer)
-  end
+      installer.pods_project.targets.each do |target|
+        target.build_configurations.each do |config|
+          config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '10.0'
+        end
+      end
+    end
 end
